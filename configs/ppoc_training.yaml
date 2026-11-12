@@ -1,0 +1,50 @@
+# High-Level Learning Brain — Multi-Rate PPOC Agent Configuration
+
+env:
+  dt: 0.005                     # 200 Hz inner loop / plant step
+  action_repeat: 10             # 20 Hz RL decision rate over 200 Hz CPG + PI loop
+  episode_max_steps: 240        # 12.0 seconds per episode (240 * 10 * 5 ms)
+  goal_distance_range_m: [1.5, 3.0]
+  goal_angle_range_rad: [-2.094, 2.094]        # +/- 120 deg for arbitrary arena waypoints
+  goal_tolerance_m: 0.22
+  # Terrain randomization parameters
+  sand_eta_range: [2.5, 3.5]
+  tile_eta_range: [0.8, 1.2]
+  # Macro-option discrete K_f set
+  omega_k_f: [0.6, 0.8, 1.0, 1.3, 1.6]
+  action_grouping: 4            # 4 regional steering groups across 12 CPG modules
+  alpha_cpg_scale: 0.38         # Maps [-2, 2] -> [-0.76, 0.76] inside linear FOC band
+
+reward:
+  w_progress: 120.0             # Potential-field progress (d_g(t-1) - d_g(t))
+  w_head: 0.30                  # Centered heading alignment cos(theta_err) - 1
+  w_effort: 0.002               # Gentle effort penalty sum(psi_i^2) per RL step
+  w_slip: 0.01                  # Mild lateral slip penalty allowing glass-escape arcs
+  goal_bonus: 150.0             # Completion bonus strictly greater than max episode alignment
+  stall_penalty: 0.0
+
+ppoc:
+  seed: 42
+  total_timesteps: 98304
+  rollout_steps: 4096
+  num_epochs: 4
+  minibatch_size: 256
+  gamma: 0.98
+  gae_lambda: 0.95
+  clip_eps: 0.12
+  target_kl: 0.012              # Tight trust region preserving glass-escape & option switches
+  entropy_coef_intra: 0.001
+  entropy_coef_master: 0.015
+  termination_reg: 0.005        # Gentle regularizer preserving bidirectional beta switching
+  lr_actor: 3.0e-5
+  lr_critic: 3.0e-4
+  lr_termination: 1.0e-5
+  max_grad_norm: 0.5
+  hidden_sizes: [128, 128]
+  log_dir: "runs/ppoc_soft_snake"
+  checkpoint_dir: "checkpoints"
+
+curriculum:
+  stage_a_fraction: 0.25        # Uniform sand (eta ~ 3.0), straight tracking
+  stage_b_fraction: 0.35        # Multi-waypoint +/- 45 deg heading changes
+  stage_c_fraction: 0.40        # Sand + polished tile patches (L/4, L/2, L)

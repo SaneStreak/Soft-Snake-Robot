@@ -1,0 +1,51 @@
+# Physical Plant Specification — Rev C Silicone DEA Soft Snake Robot
+# Grounded in Peng et al. (2026) and Hu et al. (2009)
+
+geometry:
+  num_modules: 12
+  body_length_m: 0.600          # L = 600 mm
+  body_width_m: 0.0045          # W = 4.5 mm
+  body_height_m: 0.012          # H = 12 mm
+  total_mass_kg: 0.0356         # M = 35.6 g
+  max_curvature_rad_per_m: 14.0 # Physical bending limit per module
+
+mechanics:
+  # Viscoelastic curvature response (first/second-order elastomer dynamics)
+  natural_freq_hz: 6.5          # Silicone-DEA bending bandwidth (> 1.6 Hz limit cycle)
+  damping_ratio: 0.85           # Viscoelastic damping ratio
+  flexural_rigidity_nm2: 1.8e-4 # Effective EI of laminated silicone-DEA strip
+
+dea_actuator:
+  num_strips_per_module: 2      # Bilateral left/right strips (24 total)
+  film_thickness_um: 10.0       # h = 10 um
+  relative_permittivity: 3.012  # Yields p = 54.0 kPa at V = 450 V, h = 10 um
+  vacuum_permittivity: 8.854187817e-12
+  v_max_v: 450.0                # Nominal operating rail (45 V/um)
+  e_max_v_per_um: 45.0          # Safety rail (20%+ margin below breakdown)
+  e_breakdown_v_per_um: 58.0    # Pull-in dielectric breakdown threshold
+  slew_rate_max_v_per_ms: 20.0  # Hardware driver slew limit (dV/dt <= 20 V/ms)
+  # Effective Maxwell stress-to-curvature gain (rad/m per Pa differential)
+  stress_to_curvature_gain: 2.6e-4
+  # Self-sensing capacitance nominal baseline per strip (F)
+  nominal_capacitance_pf: 620.0
+
+friction:
+  gravity_mps2: 9.81
+  eta_bifurcation: 1.7          # Hu et al. (2009) minimum anisotropy for propulsion
+  # Nominal sand substrate (eta = 3.0)
+  sand:
+    mu_t: 0.12                  # Tangential friction coefficient
+    mu_n: 0.36                  # Transverse friction coefficient (eta = 3.0)
+    stiction_factor: 1.15       # Static-to-kinetic friction ratio
+    v_stiction_mps: 0.015       # Regularization velocity threshold
+  # Polished tile band (eta = 1.0)
+  tile:
+    mu_t: 0.30                  # Tangential friction coefficient
+    mu_n: 0.30                  # Transverse friction coefficient (eta = 1.0)
+    stiction_factor: 1.30       # Higher static stiction on smooth polished tile
+    v_stiction_mps: 0.020
+
+simulation:
+  dt: 0.005                     # 200 Hz control & plant integration step
+  substeps: 2                   # Sub-stepping for non-smooth Coulomb stability
+

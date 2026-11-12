@@ -1,0 +1,19 @@
+# Spinal Layer Specification — Coupled Matsuoka CPG Neural ODE Network
+# Grounded in Liu, Onal, & Fu (2023), arXiv:2207.04899
+
+matsuoka_cpg:
+  num_modules: 12
+  dt: 0.005                     # 200 Hz RK4 integration step
+  tau_r: 0.05                   # Rise time constant (s)
+  tau_a: 0.25                   # Self-adaptation time constant (s)
+  a: 2.5                        # Mutual inhibition weight (extensor <-> flexor)
+  b: 2.5                        # Self-adaptation fatigue weight
+  c: 0.75                       # Free-Response Oscillation Constraint (FOC) baseline
+  w_coupling: 0.6               # Unidirectional inter-module coupling w_{i+1, i}
+  a_psi: 1.25                   # Output normalization gain so psi_i in [-1, 1]
+  k_f_default: 0.81             # Nominal frequency scaling factor (~1.60 Hz)
+  k_f_min: 0.5
+  k_f_max: 2.0
+  alpha_clip: 2.0               # Tonic steering activation range [-2.0, 2.0]
+  target_freq_hz: 1.6           # Expected natural limit cycle at K_f = 1.0
+  target_freq_tol_hz: 0.1
